@@ -48,6 +48,9 @@ var currentQuestion = {
 
 var trebek = io.of('/trebek')
 
+
+var firstBuzz = "x"
+
 var gameBoard = io
     .of('/gameBoard')
     .on('connection', (socket) => {
@@ -58,6 +61,9 @@ var gameBoard = io
             console.log("currentQuestion = " + JSON.stringify(currentQuestion))
             trebek.emit("new question", currentQuestion)
         });
+        socket.on('reset buzzer', data => {
+            firstBuzz = ""
+        })
 });
 
 var buzzer = io
@@ -65,6 +71,13 @@ var buzzer = io
     .on('connection', (socket) => {
         socket.on('buzz', data => {
             console.log(data)
+            if (firstBuzz === "") {
+                console.log("first!")
+                firstBuzz = data["player"]
+                gameBoard.emit("new buzz", data)
+            } else {
+                console.log("too slow")
+            }
         })
     })
 
